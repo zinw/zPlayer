@@ -19,14 +19,9 @@
 	return value: number of clipped samples
 */
 
-	.code 32
-
 	.text
 	ALIGN4
 	.globl ASM_NAME(synth_1to1_arm_accurate_asm)
-#ifdef __ELF__
-	.type ASM_NAME(synth_1to1_arm_accurate_asm), %function
-#endif
 ASM_NAME(synth_1to1_arm_accurate_asm):
 	stmfd	sp!, {r4, r5, r6, r7, r8, r9, r10, r11, lr}
 	
@@ -40,7 +35,7 @@ ASM_NAME(synth_1to1_arm_accurate_asm):
 	
 	ldr		r5, [WINDOW], #4
 	ldr		r6, [B0], #4
-1:
+.Loop_start_1:
 	ldr		r9, [WINDOW], #4
 	ldr		r10, [B0], #4
 	smull	r8, r7, r5, r6
@@ -107,7 +102,7 @@ ASM_NAME(synth_1to1_arm_accurate_asm):
 	strh	r8, [SAMPLES], #4
 	
 	subs	r3, r3, #1
-	bne		1b
+	bne		.Loop_start_1
 	
 	add		WINDOW, WINDOW, #4
 	add		B0, B0, #4
@@ -155,7 +150,7 @@ ASM_NAME(synth_1to1_arm_accurate_asm):
 	
 	mov		r3, #14
 	
-1:
+.Loop_start_2:
 	ldr		r9, [WINDOW], #4
 	ldr		r10, [B0], #4
 	smull	r8, r7, r5, r6
@@ -222,7 +217,7 @@ ASM_NAME(synth_1to1_arm_accurate_asm):
 	strh	r8, [SAMPLES], #4
 	
 	subs	r3, r3, #1
-	bne		1b
+	bne		.Loop_start_2
 	
 	ldr		r9, [WINDOW], #4
 	ldr		r10, [B0], #4
@@ -290,5 +285,3 @@ ASM_NAME(synth_1to1_arm_accurate_asm):
 	mov		r0, REG_CLIP
 	
 	ldmfd   sp!, {r4, r5, r6, r7, r8, r9, r10, r11, pc}
-
-NONEXEC_STACK

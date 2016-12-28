@@ -17,16 +17,8 @@
 	return value: number of clipped samples (0)
 */
 
-	.code 32
-#ifndef __APPLE__
-	.fpu neon
-#endif
-
 	.text
 	.globl ASM_NAME(synth_1to1_neon_accurate_asm)
-#ifdef __ELF__
-	.type ASM_NAME(synth_1to1_neon_accurate_asm), %function
-#endif
 ASM_NAME(synth_1to1_neon_accurate_asm):
 	push		{r4-r6, lr}
 	vpush		{q4-q7}
@@ -40,7 +32,7 @@ ASM_NAME(synth_1to1_neon_accurate_asm):
 	mov			r3, #4
 	mov			r4, #128
 	mov			r5, #64
-1:
+.Loop_start_1:
 	vld1.32		{q0,q1}, [WINDOW], r4
 	vld1.32		{q2,q3}, [WINDOW], r4
 	vld1.32		{q4,q5}, [WINDOW], r4
@@ -102,11 +94,11 @@ ASM_NAME(synth_1to1_neon_accurate_asm):
 	vst1.32		{q5}, [sp, :128]
 
 	subs		r3, r3, #1
-	bne			1b
+	bne			.Loop_start_1
 
 	mov			r3, #4
 	mov			r5, #-64
-1:
+.Loop_start_2:
 	vld1.32		{q0,q1}, [WINDOW], r4
 	vld1.32		{q2,q3}, [WINDOW], r4
 	vld1.32		{q4,q5}, [WINDOW], r4
@@ -169,7 +161,7 @@ ASM_NAME(synth_1to1_neon_accurate_asm):
 	vst1.32		{q5}, [sp, :128]
 
 	subs		r3, r3, #1
-	bne			1b
+	bne			.Loop_start_2
 
 	vld1.32		{q0}, [sp, :128]
 	vpadd.i32	d0, d0, d1
@@ -179,5 +171,3 @@ ASM_NAME(synth_1to1_neon_accurate_asm):
 	mov			sp, r6
 	vpop		{q4-q7}
 	pop			{r4-r6, pc}
-
-NONEXEC_STACK

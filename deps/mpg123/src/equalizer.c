@@ -9,11 +9,9 @@
 #include "mpg123app.h"
 
 /* Load the settings from the path in the global variable equalfile.
-   If there is no file, restore equalizer defaults. 
-   If NO_EQUALIZER is defined, it does nothing else that return zero */
+   If there is no file, restore equalizer defaults. */
 int load_equalizer(mpg123_handle *mh)
 {
-#ifndef NO_EQUALIZER
 	if(equalfile != NULL)
 	{ /* tst; ThOr: not TRUE or FALSE: allocated or not... */
 		FILE *fe;
@@ -45,6 +43,6 @@ int load_equalizer(mpg123_handle *mh)
 		}
 	}
 	else mpg123_reset_eq(mh);
-#endif
+
 	return 0;
 }

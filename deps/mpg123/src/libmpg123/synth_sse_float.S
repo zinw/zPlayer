@@ -52,7 +52,7 @@ ASM_NAME(synth_1to1_real_sse_asm):
 	movl		$4, %ecx
 	
 	ALIGN16
-1:
+Loop_start_1:
 	movups		(WINDOW), %xmm0
 	movups		16(WINDOW), %xmm1
 	movups		32(WINDOW), %xmm2
@@ -137,12 +137,12 @@ ASM_NAME(synth_1to1_real_sse_asm):
 	
 	leal		32(SAMPLES), SAMPLES
 	decl		%ecx
-	jnz			1b
+	jnz			Loop_start_1
 	
 	movl		$4, %ecx
 	
 	ALIGN16
-1:
+Loop_start_2:
 	movups		(WINDOW), %xmm0
 	movups		16(WINDOW), %xmm1
 	movups		32(WINDOW), %xmm2
@@ -227,7 +227,7 @@ ASM_NAME(synth_1to1_real_sse_asm):
 	
 	leal		32(SAMPLES), SAMPLES
 	decl		%ecx
-	jnz			1b
+	jnz			Loop_start_2
 	
 	xorl		%eax, %eax
 	

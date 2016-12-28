@@ -9,7 +9,6 @@
 
 #include "config.h"
 #include "mpg123.h"
-#include "httpget.h"
 #ifdef HAVE_WINDOWS_H
 
 #define WIN32_LEAN_AND_MEAN 1

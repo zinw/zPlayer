@@ -10,8 +10,7 @@ typedef struct
 	int newmode;
 } _startupinfo;
 
-/* XP and later has an int return though */
-void __cdecl __declspec(dllimport) __wgetmainargs (
+int __cdecl __declspec(dllimport) __wgetmainargs (
 	int *_Argc,
 	wchar_t ***_Argv,
 	wchar_t ***_Env,
@@ -21,7 +20,7 @@ void __cdecl __declspec(dllimport) __wgetmainargs (
 
 int win32_cmdline_utf8(int * argc, char *** argv)
 {
-	int argcounter;
+	int argcounter, ret;
 	wchar_t **argv_wide;
 	wchar_t **env;
 	char *argvptr;
@@ -31,7 +30,7 @@ int win32_cmdline_utf8(int * argc, char *** argv)
 	if(argv == NULL || argc == NULL) return -1;
 
 	startup.newmode = 0;
-	__wgetmainargs(argc, &argv_wide,&env,1, &startup);
+	ret = __wgetmainargs(argc, &argv_wide,&env,1, &startup);
 	*argv = (char **)calloc(sizeof (char *), *argc);
 	if(*argv == NULL){ error("Cannot allocate memory for command line."); return -1; }
 
@@ -40,7 +39,7 @@ int win32_cmdline_utf8(int * argc, char *** argv)
 		win32_wide_utf8(argv_wide[argcounter], &argvptr, NULL);
 		(*argv)[argcounter] = argvptr;
 	}
-	return 0;
+	return ret;
 }
 
 void win32_cmdline_free(int argc, char **argv)
@@ -51,7 +50,6 @@ void win32_cmdline_free(int argc, char **argv)
 }
 #endif /* WANT_WIN32_UNICODE */
 
-#ifdef _WIN32
 void win32_set_priority (const int arg)
 {
 	DWORD proc_result = 0;
@@ -75,7 +73,6 @@ void win32_set_priority (const int arg)
 		else fprintf(stderr,"GetCurrentProcess failed\n");
 	}
 }
-#endif
 
 #ifdef WANT_WIN32_FIFO
 static HANDLE fifohandle;
@@ -96,6 +93,7 @@ VOID CALLBACK ReadComplete(
 ssize_t win32_fifo_read(void *buf, size_t nbyte)
 {
 	int check;
+	DWORD re;
 	DWORD readbuff;
 	DWORD available;
 	debug1("Reading pipe handle %p", fifohandle);
@@ -129,7 +127,7 @@ DWORD win32_fifo_read_peek(struct timeval *tv)
 	if(!fifohandle) return 0;
 		PeekNamedPipe(fifohandle, NULL, 0, NULL, &ret, NULL);
 	err =  GetLastError();
-	debug1("Waiting %ld msec for pipe to be ready", timer);
+	debug1("Waiting %d msec for pipe to be ready", timer);
 	debug1("GetLastError was %ld", err);
 	if(err == ERROR_BROKEN_PIPE)
 	{
@@ -145,7 +143,7 @@ DWORD win32_fifo_read_peek(struct timeval *tv)
 		ConnectNamedPipe(fifohandle,&ov1);
 		WaitForSingleObjectEx(fifohandle,timer,TRUE);
 	}
-	debug2("peek %ld bytes, error %ld",ret, err);
+	debug2("peek %d bytes, error %d",ret, err);
 	return ret;
 }
 

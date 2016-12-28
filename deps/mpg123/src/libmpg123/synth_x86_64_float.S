@@ -8,7 +8,7 @@
 
 #include "mangle.h"
 
-#ifdef IS_MSABI
+#ifdef _WIN64
 /* short *window; */
 #define ARG0 %r10
 /* short *b0; */
@@ -50,7 +50,7 @@ ASM_NAME(scale_x86_64):
 	ALIGN16
 .globl ASM_NAME(synth_1to1_real_x86_64_asm)
 ASM_NAME(synth_1to1_real_x86_64_asm):
-#ifdef IS_MSABI /* should save xmm6-15 */
+#ifdef _WIN64 /* should save xmm6-15 */
 	movq		%rcx, ARG0
 	subq		$120, %rsp /* stack alignment + 7 xmm registers */
 	movaps		%xmm6, (%rsp)
@@ -73,7 +73,7 @@ ASM_NAME(synth_1to1_real_x86_64_asm):
 	movl		$4, %ecx
 	
 	ALIGN16
-1:
+Loop_start_1:
 	movups		(ARG0), %xmm8
 	movups		16(ARG0), %xmm1
 	movups		32(ARG0), %xmm2
@@ -154,12 +154,12 @@ ASM_NAME(synth_1to1_real_x86_64_asm):
 	
 	leaq		32(ARG2), ARG2
 	decl		%ecx
-	jnz			1b
+	jnz			Loop_start_1
 	
 	movl		$4, %ecx
 	
 	ALIGN16
-1:
+Loop_start_2:
 	movups		(ARG0), %xmm8
 	movups		16(ARG0), %xmm1
 	movups		32(ARG0), %xmm2
@@ -240,11 +240,11 @@ ASM_NAME(synth_1to1_real_x86_64_asm):
 	
 	leaq		32(ARG2), ARG2
 	decl		%ecx
-	jnz			1b
+	jnz			Loop_start_2
 	
 	xorl		%eax, %eax
 	
-#ifdef IS_MSABI
+#ifdef _WIN64
 	movaps		(%rsp), %xmm6
 	movaps		16(%rsp), %xmm7
 	movaps		32(%rsp), %xmm8

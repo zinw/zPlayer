@@ -8,11 +8,6 @@
 
 #include "mangle.h"
 
-	.code 32
-#ifndef __APPLE__
-	.fpu neon
-#endif
-	
 	.text
 	ALIGN16
 costab_arm:
@@ -48,11 +43,7 @@ costab_arm:
 	.word 1067924853
 	.word 1060439283
 	.word 1060439283
-	ALIGN4
 	.globl ASM_NAME(dct64_neon)
-#ifdef __ELF__
-	.type ASM_NAME(dct64_neon), %function
-#endif
 ASM_NAME(dct64_neon):
 	vpush		{q4-q7}
 
@@ -304,5 +295,3 @@ ASM_NAME(dct64_neon):
 
 	vpop		{q4-q7}
 	bx			lr
-
-NONEXEC_STACK

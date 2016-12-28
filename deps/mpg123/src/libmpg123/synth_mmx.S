@@ -31,12 +31,12 @@ ASM_NAME(synth_1to1_MMX):
 	decl %ecx
         movl 32(%esp),%esi
         movl (%edx),%eax
-        jecxz 1f
+        jecxz .L1
         decl %eax
         andl %ebx,%eax
         leal 1088(%esi),%esi
         movl %eax,(%edx)
-1:
+.L1:
         leal (%esi,%eax,2),%edx
         movl %eax,%ebp
         incl %eax
@@ -45,11 +45,11 @@ ASM_NAME(synth_1to1_MMX):
         leal 544(%esi,%eax,2),%ecx
         incl %ebx
 	testl $1, %eax
-	jnz 2f
+	jnz .L2
         xchgl %edx,%ecx
 	incl %ebp
         leal 544(%esi),%esi
-2:
+.L2:
         pushl %edx
         pushl %ecx
         call ASM_NAME(dct64_MMX)
@@ -61,7 +61,7 @@ ASM_NAME(synth_1to1_MMX):
 	movl 44(%esp),%eax /* decwins */
 	leal (%eax,%ebx,2), %edx
 	popl %eax
-3:
+.L3:
         movq  (%edx),%mm0
         pmaddwd (%esi),%mm0
         movq  8(%edx),%mm1
@@ -84,12 +84,12 @@ ASM_NAME(synth_1to1_MMX):
         leal 32(%esi),%esi
         leal 64(%edx),%edx
         leal 4(%edi),%edi
-        loop 3b
+        loop .L3
 
 
         subl $64,%esi
         movl $15,%ecx
-4:
+.L4:
         movq  (%edx),%mm0
         pmaddwd (%esi),%mm0
         movq  8(%edx),%mm1
@@ -114,7 +114,7 @@ ASM_NAME(synth_1to1_MMX):
         subl $32,%esi
         addl $64,%edx
         leal 4(%edi),%edi
-        loop 4b
+        loop .L4
 	emms
         popl %ebx
         popl %esi

@@ -10,31 +10,8 @@
 
 #include "mpg123lib_intern.h"
 #include "getbits.h"
-#include "debug.h"
 
-/*
-	Allocation value is not allowed to be 15. Initially, libmad showed me the
-	error that mpg123 used to ignore. Then, I found a quote on that in
-	Shlien, S. (1994): Guide to MPEG-1 Audio Standard. 
-	IEEE Transactions on Broadcasting 40, 4
-
-	"To avoid conflicts with the synchronization code, code '1111' is defined
-	to be illegal."
-*/
-static int check_balloc(mpg123_handle *fr, unsigned int *balloc, unsigned int *end)
-{
-	unsigned int *ba;
-	for(ba=balloc; ba != end; ++ba)
-	if(*ba == 15)
-	{
-		if(NOQUIET) error("Illegal bit allocation value.");
-		return -1;
-	}
-
-	return 0;
-}
-
-static int I_step_one(unsigned int balloc[], unsigned int scale_index[2][SBLIMIT],mpg123_handle *fr)
+static void I_step_one(unsigned int balloc[], unsigned int scale_index[2][SBLIMIT],mpg123_handle *fr)
 {
 	unsigned int *ba=balloc;
 	unsigned int *sca = (unsigned int *) scale_index;
@@ -44,13 +21,11 @@ static int I_step_one(unsigned int balloc[], unsigned int scale_index[2][SBLIMIT
 		int i;
 		int jsbound = fr->jsbound;
 		for(i=0;i<jsbound;i++)
-		{
+		{ 
 			*ba++ = getbits(fr, 4);
 			*ba++ = getbits(fr, 4);
 		}
 		for(i=jsbound;i<SBLIMIT;i++) *ba++ = getbits(fr, 4);
-
-		if(check_balloc(fr, balloc, ba)) return -1;
 
 		ba = balloc;
 
@@ -73,15 +48,11 @@ static int I_step_one(unsigned int balloc[], unsigned int scale_index[2][SBLIMIT
 		int i;
 		for(i=0;i<SBLIMIT;i++) *ba++ = getbits(fr, 4);
 
-		if(check_balloc(fr, balloc, ba)) return -1;
-
 		ba = balloc;
 		for (i=0;i<SBLIMIT;i++)
 		if ((*ba++))
 		*sca++ = getbits(fr, 6);
 	}
-
-	return 0;
 }
 
 static void I_step_two(real fraction[2][SBLIMIT],unsigned int balloc[2*SBLIMIT], unsigned int scale_index[2][SBLIMIT],mpg123_handle *fr)
@@ -166,11 +137,7 @@ int do_layer1(mpg123_handle *fr)
 	if(stereo == 1 || single == SINGLE_MIX) /* I don't see mixing handled here */
 	single = SINGLE_LEFT;
 
-	if(I_step_one(balloc,scale_index,fr))
-	{
-		if(NOQUIET) error("Aborting layer I decoding after step one.\n");
-		return clip;
-	}
+	I_step_one(balloc,scale_index,fr);
 
 	for(i=0;i<SCALE_BLOCK;i++)
 	{

@@ -56,41 +56,47 @@ static OSStatus playProc(AudioConverterRef inAudioConverter,
 {
 	mpg123_coreaudio_t *ca = (mpg123_coreaudio_t *)inClientData;
 	long n;
-	
-	
-	if(ca->last_buffer) {
-		ca->play_done = 1;
-		return noErr;
-	}
-	
+
+    /* This is not actually a loop. See the early break. */
 	for(n = 0; n < outOutputData->mNumberBuffers; n++)
 	{
 		unsigned int wanted = *ioNumberDataPackets * ca->channels * ca->bps;
 		unsigned char *dest;
 		unsigned int read;
+        int avail;
+
+        /* Any buffer count > 1 would wreck havoc with this code. */
+        if(n > 0)
+            break;
+
 		if(ca->buffer_size < wanted) {
 			debug1("Allocating %d byte sample conversion buffer", wanted);
 			ca->buffer = realloc( ca->buffer, wanted);
 			ca->buffer_size = wanted;
 		}
 		dest = ca->buffer;
+        if(!dest)
+            return -1;
 		
 		/* Only play if we have data left */
-		if ( sfifo_used( &ca->fifo ) < (int)wanted ) {
-			if(!ca->decode_done) {
-				warning("Didn't have any audio data in callback (buffer underflow)");
-				return -1;
-			}
-			wanted = sfifo_used( &ca->fifo );
-			ca->last_buffer = 1;
-		}
-		
-		/* Read audio from FIFO to SDL's buffer */
-		read = sfifo_read( &ca->fifo, dest, wanted );
-		
-		if (wanted!=read)
-			warning2("Error reading from the ring buffer (wanted=%u, read=%u).\n", wanted, read);
-		
+        while((avail=sfifo_used( &ca->fifo )) < wanted && !ca->decode_done)
+        {
+            int ms = (wanted-avail)/ao->framesize*1000/ao->rate;
+            debug3("waiting for more input, %d ms missing (%i < %u)"
+            ,       ms, avail, wanted);
+            usleep(ms*100); /* Wait for 1/10th of the missing duration. Might want to adjust. */
+        }
+        if(avail > wanted)
+            avail = wanted;
+        else if(ca->decode_done)
+            ca->play_done = 1;
+
+        /* Read audio from FIFO to CoreAudio's buffer */
+        read = sfifo_read(&ca->fifo, dest, avail);
+
+		if(read!=avail)
+            warning2("Error reading from the ring buffer (avail=%u, read=%u).\n", avail, read);
+
 		outOutputData->mBuffers[n].mDataByteSize = read;
 		outOutputData->mBuffers[n].mData = dest;
 	}

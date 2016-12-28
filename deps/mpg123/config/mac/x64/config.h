@@ -315,7 +315,7 @@
 /* #undef NO_STRING */
 
 /* Define to disable warning messages. */
-/* #undef NO_WARNING */
+#define NO_WARNING 1
 
 /* Name of package */
 #define PACKAGE "mpg123"

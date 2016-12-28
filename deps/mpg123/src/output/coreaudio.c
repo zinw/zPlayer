@@ -62,18 +62,27 @@ static OSStatus playProc(AudioConverterRef inAudioConverter,
 		ca->play_done = 1;
 		return noErr;
 	}
-	
+
+	/* This is not actually a loop. See the early break. */
 	for(n = 0; n < outOutputData->mNumberBuffers; n++)
 	{
 		unsigned int wanted = *ioNumberDataPackets * ca->channels * ca->bps;
 		unsigned char *dest;
 		unsigned int read;
+
+		/* Any buffer count > 1 would wreck havoc with this code. */
+		if(n > 0)
+			break;
+
 		if(ca->buffer_size < wanted) {
 			debug1("Allocating %d byte sample conversion buffer", wanted);
 			ca->buffer = realloc( ca->buffer, wanted);
 			ca->buffer_size = wanted;
 		}
 		dest = ca->buffer;
+
+		if(!dest)
+			return -1;
 		
 		/* Only play if we have data left */
 		if ( sfifo_used( &ca->fifo ) < (int)wanted ) {

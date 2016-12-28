@@ -1,7 +1,10 @@
 {
-  "name": "speaker",
-  "description": "Output PCM audio data to the speakers",
+  "name": "zplayer",
+  "description": "a mp3 stream player",
   "keywords": [
+    "mp3",
+    "stream",
+    "player",
     "pcm",
     "audio",
     "sound",
@@ -20,16 +23,16 @@
     "mpg123"
   ],
   "license": "MIT",
-  "version": "0.3.0",
-  "author": "Nathan Rajlich <nathan@tootallnate.net> (http://tootallnate.net)",
+  "version": "0.4.1",
+  "author": "Zinway Liu <z@zin.so> (http://zin.so/)",
   "repository": {
     "type": "git",
-    "url": "git://github.com/TooTallNate/node-speaker.git"
+    "url": "git://github.com/zinw/zPlayer.git"
   },
   "bugs": {
-    "url": "https://github.com/TooTallNate/node-speaker/issues"
+    "url": "https://github.com/zinw/zPlayer/issues"
   },
-  "homepage": "https://github.com/TooTallNate/node-speaker",
+  "homepage": "https://github.com/zinw/zPlayer",
   "main": "./index.js",
   "scripts": {
     "test": "node-gyp rebuild --mpg123-backend=dummy && mocha --reporter spec"
